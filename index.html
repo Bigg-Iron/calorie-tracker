@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calorie Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Nutrition tracker</p>
+        <h1>Calorie Tracker</h1>
+        <p class="subtitle">Add food items, view nutrition information, and track meal and daily totals.</p>
+      </div>
+    </header>
+
+    <section class="card entry-card">
+      <h2>Log a food item</h2>
+      <form id="food-form" class="food-form" aria-label="Add a food item">
+        <div class="field-group">
+          <label for="food-name">Food</label>
+          <input id="food-name" name="foodName" type="text" list="food-suggestions" autocomplete="off" placeholder="Chicken breast" required />
+          <datalist id="food-suggestions"></datalist>
+        </div>
+        <div class="field-group">
+          <label for="meal-type">Meal</label>
+          <select id="meal-type" name="mealType" required>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snack">Snack</option>
+          </select>
+        </div>
+        <div class="field-grid">
+          <div class="field-group">
+            <label for="quantity">Quantity</label>
+            <input id="quantity" name="quantity" type="number" min="1" step="1" placeholder="2" required />
+          </div>
+          <div class="field-group">
+            <label for="serving-size">Serving size</label>
+            <input id="serving-size" name="servingSize" type="text" placeholder="Large" required />
+          </div>
+          <div class="field-group">
+            <label for="calories">Calories</label>
+            <input id="calories" name="calories" type="number" min="0" step="1" placeholder="120" required />
+          </div>
+          <div class="field-group">
+            <label for="protein">Protein (g)</label>
+            <input id="protein" name="protein" type="number" min="0" step="0.1" placeholder="25" required />
+          </div>
+          <div class="field-group">
+            <label for="carbs">Carbs (g)</label>
+            <input id="carbs" name="carbs" type="number" min="0" step="0.1" placeholder="0" required />
+          </div>
+          <div class="field-group">
+            <label for="fats">Fats (g)</label>
+            <input id="fats" name="fats" type="number" min="0" step="0.1" placeholder="3" required />
+          </div>
+        </div>
+        <button type="submit" class="primary-button">Add Item</button>
+      </form>
+    </section>
+
+    <section class="card filter-card">
+      <h2>Recall entries</h2>
+      <div class="recall-actions" role="group" aria-label="Recall entries by date">
+        <button type="button" data-date="all" class="secondary-button recall-button active">All entries</button>
+        <button type="button" data-date="today" class="secondary-button recall-button">Today</button>
+        <button type="button" data-date="yesterday" class="secondary-button recall-button">Yesterday</button>
+        <input type="date" id="custom-date" class="date-input" aria-label="Select a date to recall entries" />
+      </div>
+      <p class="summary-text" id="recall-summary">Showing all logged entries.</p>
+    </section>
+
+    <section class="summary-grid">
+      <article class="card summary-card">
+        <h3>Daily totals</h3>
+        <div class="summary-value">
+          <span>Calories</span>
+          <strong id="daily-calories">0</strong>
+        </div>
+        <div class="summary-value">
+          <span>Protein</span>
+          <strong id="daily-protein">0 g</strong>
+        </div>
+        <div class="summary-value">
+          <span>Carbs</span>
+          <strong id="daily-carbs">0 g</strong>
+        </div>
+        <div class="summary-value">
+          <span>Fats</span>
+          <strong id="daily-fats">0 g</strong>
+        </div>
+      </article>
+      <article class="card summary-card highlight-card">
+        <h3>Today's meals</h3>
+        <p class="summary-text">Log your meals and review nutrition subtotals by meal category.</p>
+      </article>
+    </section>
+
+    <section id="meal-list" class="meal-list"></section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
