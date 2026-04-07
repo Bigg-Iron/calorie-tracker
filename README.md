@@ -33,31 +33,38 @@ This application lets you add food items with nutrition information, delete item
 To make the app accessible from any internet-connected device (like smartphones), deploy it to a static hosting service. Here's how to deploy to GitHub Pages (free):
 
 ### Prerequisites
+
 - A GitHub account
 - Git installed locally
 
 ### Steps
+
 1. Create a new repository on GitHub (e.g., `calorie-tracker`).
 2. Initialize Git in your local project folder:
-   ```
+
+   ```bash
    git init
    git add .
    git commit -m "Initial commit"
    ```
+
 3. Add the GitHub repository as remote:
-   ```
-   git remote add origin https://github.com/Bigg-Iron/calorie-tracker.git
-   https://github.com/Bigg-Iron/calorie-tracker.git
+
+   ```bash
+   git remote add origin https://github.com/yourusername/calorie-tracker.git
    git push -u origin main
    ```
+
 4. Enable GitHub Pages in your repository settings:
    - Go to Settings > Pages
    - Select "Deploy from a branch"
    - Choose "main" branch and "/ (root)" folder
    - Save
+
 5. Your app will be available at `https://yourusername.github.io/calorie-tracker/`
 
 ### Alternative: Netlify (also free)
+
 1. Sign up for a Netlify account at netlify.com
 2. Drag and drop the project folder to the Netlify dashboard, or connect your GitHub repo
 3. Netlify will provide a live URL (e.g., `https://amazing-site.netlify.app`)
