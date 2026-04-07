@@ -46,7 +46,8 @@ To make the app accessible from any internet-connected device (like smartphones)
    ```
 3. Add the GitHub repository as remote:
    ```
-   git remote add origin https://github.com/yourusername/calorie-tracker.git
+   git remote add origin https://github.com/Bigg-Iron/calorie-tracker.git
+   https://github.com/Bigg-Iron/calorie-tracker.git
    git push -u origin main
    ```
 4. Enable GitHub Pages in your repository settings:
