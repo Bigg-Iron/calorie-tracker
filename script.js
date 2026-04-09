@@ -16,8 +16,10 @@ const dailyCalories = document.getElementById('daily-calories');
 const dailyProtein = document.getElementById('daily-protein');
 const dailyCarbs = document.getElementById('daily-carbs');
 const dailyFats = document.getElementById('daily-fats');
+const loginButton = document.getElementById('login-button');
+const logoutButton = document.getElementById('logout-button');
+const userInfo = document.getElementById('user-info');
 
-const STORAGE_KEY = 'calorie-tracker-items';
 const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_LABELS = {
   breakfast: 'Breakfast',
@@ -33,22 +35,29 @@ const DATE_FILTERS = {
   custom: 'custom',
 };
 
-let items = loadItems();
+let items = [];
 let activeDateFilter = DATE_FILTERS.all;
 let customFilterDate = '';
+let currentUser = null;
 
-function loadItems() {
+async function loadItems() {
+  if (!currentUser) return [];
   try {
-    const rawData = localStorage.getItem(STORAGE_KEY);
-    return rawData ? JSON.parse(rawData) : [];
+    const q = window.firebaseFunctions.query(window.firebaseFunctions.collection(window.firebaseDb, 'items'), window.firebaseFunctions.where('userId', '==', currentUser.uid));
+    const querySnapshot = await window.firebaseFunctions.getDocs(q);
+    const loadedItems = [];
+    querySnapshot.forEach((doc) => {
+      loadedItems.push({ id: doc.id, ...doc.data() });
+    });
+    return loadedItems;
   } catch (error) {
     console.error('Failed to load saved items', error);
     return [];
   }
 }
 
-function saveItems() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+async function saveItems() {
+  // Items are saved individually in addItem and removeItem
 }
 
 function updateSuggestions() {
@@ -262,8 +271,13 @@ function validateNumber(value, isInteger = false) {
   return number >= 0;
 }
 
-function addItem(event) {
+async function addItem(event) {
   event.preventDefault();
+
+  if (!currentUser) {
+    alert('Please sign in to add items.');
+    return;
+  }
 
   const name = foodNameInput.value.trim();
   const meal = mealTypeSelect.value;
@@ -287,8 +301,8 @@ function addItem(event) {
     return;
   }
 
-  items.push({
-    id: Date.now().toString(),
+  const newItem = {
+    userId: currentUser.uid,
     name,
     meal,
     quantity,
@@ -298,13 +312,17 @@ function addItem(event) {
     protein,
     carbs,
     fats,
-  });
+  };
 
-  saveItems();
-  updateSuggestions();
-  renderItems();
-  foodForm.reset();
-  foodNameInput.focus();
+  try {
+    await window.firebaseFunctions.addDoc(window.firebaseFunctions.collection(window.firebaseDb, 'items'), newItem);
+    // Real-time listener will update items
+    foodForm.reset();
+    foodNameInput.focus();
+  } catch (error) {
+    console.error('Failed to add item', error);
+    alert(`Failed to add item: ${error.message}`);
+  }
 }
 
 function fillNutritionFromFood(name) {
@@ -322,32 +340,152 @@ function fillNutritionFromFood(name) {
   mealTypeSelect.value = item.meal;
 }
 
-function removeItem(itemId) {
-  items = items.filter((item) => item.id !== itemId);
-  saveItems();
-  updateSuggestions();
-  renderItems();
+async function removeItem(itemId) {
+  try {
+    await window.firebaseFunctions.deleteDoc(window.firebaseFunctions.doc(window.firebaseDb, 'items', itemId));
+    // Real-time listener will update items
+  } catch (error) {
+    console.error('Failed to remove item', error);
+  }
 }
 
-foodForm.addEventListener('submit', addItem);
-foodNameInput.addEventListener('input', (event) => {
-  const currentValue = event.target.value.trim();
-  if (currentValue.length >= 2) {
-    fillNutritionFromFood(currentValue);
+async function signIn(email, password) {
+  try {
+    await window.firebaseFunctions.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+  } catch (error) {
+    alert('Sign in failed: ' + error.message);
   }
-});
-recallButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    setActiveDateFilter(button.dataset.date);
-  });
-});
-customDateInput.addEventListener('change', (event) => {
-  const value = event.target.value;
-  if (value) {
-    customFilterDate = value;
-    setActiveDateFilter(DATE_FILTERS.custom);
-  }
-});
+}
 
-setActiveDateFilter(DATE_FILTERS.all);
-updateSuggestions();
+async function signUp(email, password) {
+  try {
+    await window.firebaseFunctions.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+  } catch (error) {
+    alert('Sign up failed: ' + error.message);
+  }
+}
+
+async function signOutUser() {
+  try {
+    await window.firebaseFunctions.signOut(window.firebaseAuth);
+  } catch (error) {
+    console.error('Sign out failed', error);
+  }
+}
+
+function showAuthPrompt() {
+  const email = prompt('Enter your email:');
+  if (!email) return;
+  const password = prompt('Enter your password:');
+  if (!password) return;
+  const isSignUp = confirm('New user? Click OK to sign up, Cancel to sign in.');
+  if (isSignUp) {
+    signUp(email, password);
+  } else {
+    signIn(email, password);
+  }
+}
+
+function updateAuthUI(user) {
+  if (user) {
+    loginButton.style.display = 'none';
+    logoutButton.style.display = 'inline-block';
+    userInfo.style.display = 'block';
+    userInfo.textContent = `Signed in as ${user.email}`;
+  } else {
+    loginButton.style.display = 'inline-block';
+    logoutButton.style.display = 'none';
+    userInfo.style.display = 'none';
+    items = [];
+    renderItems();
+  }
+}
+
+let unsubscribeItems = null;
+
+async function waitForFirebaseReady() {
+  if (window.firebaseReady) {
+    await window.firebaseReady;
+    return;
+  }
+
+  let retries = 0;
+  while (!window.firebaseFunctions && retries < 40) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    retries += 1;
+  }
+
+  if (!window.firebaseFunctions) {
+    throw new Error('Firebase initialization failed: window.firebaseFunctions not available.');
+  }
+}
+
+async function initApp() {
+  try {
+    await waitForFirebaseReady();
+  } catch (error) {
+    console.error(error);
+    alert('Firebase failed to initialize. Refresh the page and try again.');
+    return;
+  }
+
+  window.firebaseFunctions.onAuthStateChanged(window.firebaseAuth, async (user) => {
+    currentUser = user;
+    updateAuthUI(user);
+    if (user) {
+      items = await loadItems();
+      updateSuggestions();
+      renderItems();
+      if (unsubscribeItems) unsubscribeItems();
+
+      const q = window.firebaseFunctions.query(
+        window.firebaseFunctions.collection(window.firebaseDb, 'items'),
+        window.firebaseFunctions.where('userId', '==', currentUser.uid)
+      );
+
+      unsubscribeItems = window.firebaseFunctions.onSnapshot
+        ? window.firebaseFunctions.onSnapshot(q, (querySnapshot) => {
+            items = [];
+            querySnapshot.forEach((doc) => {
+              items.push({ id: doc.id, ...doc.data() });
+            });
+            updateSuggestions();
+            renderItems();
+          })
+        : null;
+    } else {
+      if (unsubscribeItems) {
+        unsubscribeItems();
+        unsubscribeItems = null;
+      }
+    }
+  });
+
+  foodForm.addEventListener('submit', addItem);
+  foodNameInput.addEventListener('input', (event) => {
+    const currentValue = event.target.value.trim();
+    if (currentValue.length >= 2) {
+      fillNutritionFromFood(currentValue);
+    }
+  });
+  recallButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      setActiveDateFilter(button.dataset.date);
+    });
+  });
+  customDateInput.addEventListener('change', (event) => {
+    const value = event.target.value;
+    if (value) {
+      customFilterDate = value;
+      setActiveDateFilter(DATE_FILTERS.custom);
+    }
+  });
+
+  loginButton.addEventListener('click', showAuthPrompt);
+  logoutButton.addEventListener('click', signOutUser);
+
+  setActiveDateFilter(DATE_FILTERS.all);
+  updateSuggestions();
+}
+
+initApp();

@@ -14,6 +14,11 @@
         <h1>Calorie Tracker</h1>
         <p class="subtitle">Add food items, view nutrition information, and track meal and daily totals.</p>
       </div>
+      <div id="auth-section" class="auth-section">
+        <button id="login-button" class="secondary-button">Sign In</button>
+        <button id="logout-button" class="secondary-button" style="display: none;">Sign Out</button>
+        <p id="user-info" style="display: none;"></p>
+      </div>
     </header>
 
     <section class="card entry-card">
@@ -103,6 +108,37 @@
     <section id="meal-list" class="meal-list"></section>
   </main>
 
-  <script src="script.js"></script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    // Firebase configuration - Replace with your Firebase project config
+    const firebaseConfig = {
+  apiKey: "AIzaSyDfO3MCiFYG76zBf_1X5LzbuzWRi_n33pA",
+  authDomain: "fitness-tracker-bc7b5.firebaseapp.com",
+  projectId: "fitness-tracker-bc7b5",
+  storageBucket: "fitness-tracker-bc7b5.firebasestorage.app",
+  messagingSenderId: "993376580041",
+  appId: "1:993376580041:web:fd859fcb4b319426853818",
+  measurementId: "G-R15N7CHXLT"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.firebaseReady = new Promise((resolve) => {
+      window.resolveFirebaseReady = resolve;
+    });
+
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.firebaseFunctions = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, collection, addDoc, getDocs, deleteDoc, doc, query, where, onSnapshot };
+    window.resolveFirebaseReady();
+  </script>
+  <script src="script.js" defer></script>
 </body>
 </html>

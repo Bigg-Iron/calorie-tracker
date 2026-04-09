@@ -53,6 +53,23 @@ body::before {
   box-shadow: var(--shadow);
 }
 
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-self: end;
+}
+
+.auth-section button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+#user-info {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .eyebrow {
   margin: 0;
   text-transform: uppercase;
