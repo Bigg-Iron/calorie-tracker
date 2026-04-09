@@ -23,6 +23,7 @@ This application lets you add food items with nutrition information, delete item
 - View meal subtotals for breakfast, lunch, dinner, and snacks
 - View daily nutrition totals for calories, protein, carbs, and fats
 - Real-time sync across devices
+- Google Analytics integration for usage tracking
 
 ## Firebase Setup
 
@@ -71,6 +72,23 @@ Your Firestore database needs rules that allow authenticated users to read and w
 3. Publish the rules.
 
 If you use the Firebase CLI, you can also store rules in `firebase.rules` and use `firebase.json` to deploy them.
+
+## Google Analytics
+
+The app includes Google Analytics 4 (GA4) integration to track user interactions:
+
+- **Page views**: Basic site usage
+- **Custom events**:
+  - `add_food_item`: When users add food items (includes meal type and calories)
+  - `delete_food_item`: When users delete food items
+  - `autocomplete_used`: When users use autocomplete for food names
+  - `date_filter_changed`: When users change date filters
+  - `login`: When users sign in
+  - `sign_up`: When users create accounts
+  - `logout`: When users sign out
+
+Analytics data helps understand user behavior and improve the app. All tracking is privacy-compliant and follows Google's data collection policies.
+
 ## Project structure
 
 - `index.html` — page markup

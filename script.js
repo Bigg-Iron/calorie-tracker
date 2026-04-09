@@ -220,6 +220,14 @@ function setActiveDateFilter(filter) {
 
   updateRecallSummary();
   renderItems();
+
+  // Track date filter usage
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'date_filter_changed', {
+      event_category: 'navigation',
+      event_label: filter
+    });
+  }
 }
 
 function renderItems() {
@@ -319,6 +327,15 @@ async function addItem(event) {
     // Real-time listener will update items
     foodForm.reset();
     foodNameInput.focus();
+
+    // Track item addition in Google Analytics
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'add_food_item', {
+        event_category: 'engagement',
+        event_label: meal,
+        value: calories
+      });
+    }
   } catch (error) {
     console.error('Failed to add item', error);
     alert(`Failed to add item: ${error.message}`);
@@ -338,12 +355,27 @@ function fillNutritionFromFood(name) {
   carbsInput.value = item.carbs;
   fatsInput.value = item.fats;
   mealTypeSelect.value = item.meal;
+
+  // Track autocomplete usage
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'autocomplete_used', {
+      event_category: 'engagement',
+      event_label: name
+    });
+  }
 }
 
 async function removeItem(itemId) {
   try {
     await window.firebaseFunctions.deleteDoc(window.firebaseFunctions.doc(window.firebaseDb, 'items', itemId));
     // Real-time listener will update items
+
+    // Track item deletion
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'delete_food_item', {
+        event_category: 'engagement'
+      });
+    }
   } catch (error) {
     console.error('Failed to remove item', error);
   }
@@ -352,6 +384,12 @@ async function removeItem(itemId) {
 async function signIn(email, password) {
   try {
     await window.firebaseFunctions.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+    // Track sign in
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'login', {
+        method: 'email'
+      });
+    }
   } catch (error) {
     alert('Sign in failed: ' + error.message);
   }
@@ -360,6 +398,12 @@ async function signIn(email, password) {
 async function signUp(email, password) {
   try {
     await window.firebaseFunctions.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+    // Track sign up
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'sign_up', {
+        method: 'email'
+      });
+    }
   } catch (error) {
     alert('Sign up failed: ' + error.message);
   }
@@ -368,6 +412,10 @@ async function signUp(email, password) {
 async function signOutUser() {
   try {
     await window.firebaseFunctions.signOut(window.firebaseAuth);
+    // Track sign out
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'logout');
+    }
   } catch (error) {
     console.error('Sign out failed', error);
   }
