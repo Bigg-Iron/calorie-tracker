@@ -89,6 +89,32 @@ The app includes Google Analytics 4 (GA4) integration to track user interactions
 
 Analytics data helps understand user behavior and improve the app. All tracking is privacy-compliant and follows Google's data collection policies.
 
+## Mobile Experience
+
+The app is optimized for mobile devices with the following features:
+
+- **Progressive Web App (PWA)**: Installable on mobile devices with offline capabilities
+- **Floating Action Button (FAB)**: Quick access to add food items on mobile
+- **Touch-Friendly Interface**: Larger buttons and touch targets (minimum 44px)
+- **Swipe Gestures**: Swipe left/right on date filters to navigate
+- **Pull-to-Refresh**: Pull down from the top to refresh data
+- **Mobile-Optimized Forms**: Prevents zoom on input focus, better keyboard handling
+- **Horizontal Table Scrolling**: Tables scroll horizontally on small screens
+- **iOS-Specific Optimizations**: Custom styling for iPhone notch and Safari
+
+### Mobile Installation
+
+1. Open the app in Safari/Chrome on your mobile device
+2. Tap the share button (iOS) or menu button (Android)
+3. Select "Add to Home Screen" or "Install App"
+4. The app will appear as a native app icon
+
+### Mobile Gestures
+
+- **Swipe on date filters**: Navigate between All/Today/Yesterday
+- **Pull to refresh**: Pull down from the top of the page
+- **FAB button**: Quick add food items (bottom right on mobile)
+
 ## Project structure
 
 - `index.html` — page markup

@@ -10,6 +10,8 @@
   --accent: #f97316;
   --danger: #ef4444;
   --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 25px 50px rgba(15, 23, 42, 0.15);
+  --touch-target: 44px; /* Minimum touch target size */
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -41,6 +43,122 @@ body::before {
   width: min(100%, 92rem);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom)); /* Account for iPhone notch */
+}
+
+/* Floating Action Button */
+.fab-button {
+  position: fixed;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  right: calc(1.5rem + env(safe-area-inset-right));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: none;
+  color: white;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  display: none; /* Hidden on desktop, shown on mobile */
+  z-index: 1000;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-button:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+}
+
+.fab-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Touch feedback animations */
+@media (hover: none) and (pointer: coarse) {
+  .primary-button:active,
+  .secondary-button:active,
+  .recall-button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  .delete-button:active {
+    background: var(--danger);
+    transform: scale(0.95);
+  }
+
+  /* Mobile keyboard optimizations */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS specific styles */
+    input, select, textarea {
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 0.75rem;
+    }
+
+    input[type="number"] {
+      -webkit-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+  }
+
+  /* Better mobile scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile-optimized focus states */
+  input:focus, select:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .fab-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Larger touch targets for mobile */
+  .primary-button,
+  .secondary-button,
+  .delete-button {
+    min-height: var(--touch-target);
+    padding: 0.875rem 1.5rem;
+    font-size: 1.1rem;
+  }
+
+  .recall-button {
+    min-height: var(--touch-target);
+    padding: 0.875rem 1.25rem;
+  }
+
+  /* Better mobile form inputs */
+  input, select {
+    min-height: var(--touch-target);
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .date-input {
+    min-height: var(--touch-target);
+    font-size: 16px;
+  }
 }
 
 .hero {
@@ -108,6 +226,61 @@ h1 {
 .food-form {
   display: grid;
   gap: 1rem;
+}
+
+/* Mobile form improvements */
+@media (max-width: 680px) {
+  .food-form {
+    gap: 1.25rem;
+  }
+
+  .field-group {
+    gap: 0.75rem;
+  }
+
+  /* Better mobile input styling */
+  input, select {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-size: 16px; /* Prevents zoom on focus */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Mobile-optimized autocomplete */
+  input[list] {
+    position: relative;
+  }
+
+  /* Better mobile table experience */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .nutrition-table {
+    min-width: 600px; /* Ensures horizontal scroll on mobile */
+    font-size: 0.9rem;
+  }
+
+  .nutrition-table th,
+  .nutrition-table td {
+    padding: 0.75rem;
+    white-space: nowrap;
+  }
+
+  /* Mobile-friendly delete buttons */
+  .delete-button {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    min-width: 60px;
+  }
 }
 
 .filter-card {

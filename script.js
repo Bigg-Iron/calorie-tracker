@@ -19,6 +19,7 @@ const dailyFats = document.getElementById('daily-fats');
 const loginButton = document.getElementById('login-button');
 const logoutButton = document.getElementById('logout-button');
 const userInfo = document.getElementById('user-info');
+const fabButton = document.getElementById('fab-add');
 
 const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_LABELS = {
@@ -35,10 +36,10 @@ const DATE_FILTERS = {
   custom: 'custom',
 };
 
-let items = [];
-let activeDateFilter = DATE_FILTERS.all;
-let customFilterDate = '';
 let currentUser = null;
+let touchStartX = 0;
+let touchStartY = 0;
+let isPullingToRefresh = false;
 
 async function loadItems() {
   if (!currentUser) return [];
@@ -532,8 +533,166 @@ async function initApp() {
   loginButton.addEventListener('click', showAuthPrompt);
   logoutButton.addEventListener('click', signOutUser);
 
-  setActiveDateFilter(DATE_FILTERS.all);
-  updateSuggestions();
+// Mobile-specific functionality
+function initMobileFeatures() {
+  // FAB functionality
+  if (fabButton) {
+    fabButton.addEventListener('click', () => {
+      foodForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      foodNameInput.focus();
+
+      // Track FAB usage
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'fab_used', {
+          event_category: 'mobile_interaction'
+        });
+      }
+    });
+  }
+
+  // Swipe gestures for date filters
+  const filterCard = document.querySelector('.filter-card');
+  if (filterCard) {
+    filterCard.addEventListener('touchstart', handleTouchStart, { passive: false });
+    filterCard.addEventListener('touchmove', handleTouchMove, { passive: false });
+    filterCard.addEventListener('touchend', handleTouchEnd, { passive: false });
+  }
+
+  // Pull-to-refresh functionality
+  let startY = 0;
+  let refreshThreshold = 80;
+
+  document.addEventListener('touchstart', (e) => {
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (window.scrollY === 0 && !isPullingToRefresh) {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+
+      if (diff > 50) {
+        e.preventDefault();
+        isPullingToRefresh = true;
+        showPullIndicator();
+      }
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', async () => {
+    if (isPullingToRefresh) {
+      hidePullIndicator();
+      await refreshData();
+      isPullingToRefresh = false;
+    }
+  });
+}
+
+function handleTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchMove(e) {
+  if (!touchStartX || !touchStartY) return;
+
+  const touchEndX = e.touches[0].clientX;
+  const touchEndY = e.touches[0].clientY;
+  const diffX = touchStartX - touchEndX;
+  const diffY = touchStartY - touchEndY;
+
+  // Only handle horizontal swipes (more significant than vertical)
+  if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+    e.preventDefault();
+
+    if (diffX > 0) {
+      // Swipe left - next filter
+      cycleDateFilter('next');
+    } else {
+      // Swipe right - previous filter
+      cycleDateFilter('prev');
+    }
+
+    touchStartX = 0;
+    touchStartY = 0;
+  }
+}
+
+function handleTouchEnd() {
+  touchStartX = 0;
+  touchStartY = 0;
+}
+
+function cycleDateFilter(direction) {
+  const filters = [DATE_FILTERS.all, DATE_FILTERS.today, DATE_FILTERS.yesterday];
+  let currentIndex = filters.indexOf(activeDateFilter);
+
+  if (direction === 'next') {
+    currentIndex = (currentIndex + 1) % filters.length;
+  } else {
+    currentIndex = currentIndex <= 0 ? filters.length - 1 : currentIndex - 1;
+  }
+
+  setActiveDateFilter(filters[currentIndex]);
+
+  // Track swipe usage
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'swipe_navigation', {
+      event_category: 'mobile_interaction',
+      event_label: direction
+    });
+  }
+}
+
+function showPullIndicator() {
+  const indicator = document.createElement('div');
+  indicator.id = 'pull-indicator';
+  indicator.textContent = '🔄 Pull to refresh';
+  indicator.style.cssText = `
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    z-index: 1001;
+    pointer-events: none;
+  `;
+  document.body.appendChild(indicator);
+}
+
+function hidePullIndicator() {
+  const indicator = document.getElementById('pull-indicator');
+  if (indicator) {
+    indicator.remove();
+  }
+}
+
+async function refreshData() {
+  if (currentUser) {
+    items = await loadItems();
+    updateSuggestions();
+    renderItems();
+
+    // Track refresh usage
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'pull_to_refresh', {
+        event_category: 'mobile_interaction'
+      });
+    }
+  }
+}
+
+setActiveDateFilter(DATE_FILTERS.all);
+updateSuggestions();
+
+// Initialize mobile features after Firebase is ready
+initApp().then(() => {
+  initMobileFeatures();
+});
 }
 
 initApp();
