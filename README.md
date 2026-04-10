@@ -50,6 +50,7 @@ This application lets you add food items with nutrition information, delete item
      appId: "your-app-id"
    };
    ```
+
 ## Firestore Security Rules
 
 Your Firestore database needs rules that allow authenticated users to read and write only their own items.
