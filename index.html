@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Calorie Tracker" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='65' font-family='Arial, sans-serif' font-size='60' font-weight='bold' text-anchor='middle' fill='white'>🍎</text></svg>" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-R15N7CHXLT"></script>
@@ -21,148 +21,9 @@
     gtag('config', 'G-R15N7CHXLT');
   </script>
   <title>Calorie Tracker</title>
-  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="app-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Nutrition tracker</p>
-        <h1>Calorie Tracker</h1>
-        <p class="subtitle">Add food items, view nutrition information, and track meal and daily totals.</p>
-      </div>
-      <div id="auth-section" class="auth-section">
-        <button id="login-button" class="secondary-button">Sign In</button>
-        <button id="logout-button" class="secondary-button" style="display: none;">Sign Out</button>
-        <p id="user-info" style="display: none;"></p>
-      </div>
-    </header>
-
-    <section class="card entry-card">
-      <h2>Log a food item</h2>
-      <form id="food-form" class="food-form" aria-label="Add a food item">
-        <div class="field-group">
-          <label for="food-name">Food</label>
-          <input id="food-name" name="foodName" type="text" list="food-suggestions" autocomplete="off" placeholder="Chicken breast" required />
-          <datalist id="food-suggestions"></datalist>
-        </div>
-        <div class="field-group">
-          <label for="meal-type">Meal</label>
-          <select id="meal-type" name="mealType" required>
-            <option value="breakfast">Breakfast</option>
-            <option value="lunch">Lunch</option>
-            <option value="dinner">Dinner</option>
-            <option value="snack">Snack</option>
-          </select>
-        </div>
-        <div class="field-grid">
-          <div class="field-group">
-            <label for="quantity">Quantity</label>
-            <input id="quantity" name="quantity" type="number" min="1" step="1" placeholder="2" required />
-          </div>
-          <div class="field-group">
-            <label for="serving-size">Serving size</label>
-            <input id="serving-size" name="servingSize" type="text" placeholder="Large" required />
-          </div>
-          <div class="field-group">
-            <label for="calories">Calories</label>
-            <input id="calories" name="calories" type="number" min="0" step="1" placeholder="120" required />
-          </div>
-          <div class="field-group">
-            <label for="protein">Protein (g)</label>
-            <input id="protein" name="protein" type="number" min="0" step="0.1" placeholder="25" required />
-          </div>
-          <div class="field-group">
-            <label for="carbs">Carbs (g)</label>
-            <input id="carbs" name="carbs" type="number" min="0" step="0.1" placeholder="0" required />
-          </div>
-          <div class="field-group">
-            <label for="fats">Fats (g)</label>
-            <input id="fats" name="fats" type="number" min="0" step="0.1" placeholder="3" required />
-          </div>
-        </div>
-        <button type="submit" class="primary-button">Add Item</button>
-      </form>
-    </section>
-
-    <section class="card filter-card">
-      <h2>Recall entries</h2>
-      <div class="recall-actions" role="group" aria-label="Recall entries by date">
-        <button type="button" data-date="all" class="secondary-button recall-button active">All entries</button>
-        <button type="button" data-date="today" class="secondary-button recall-button">Today</button>
-        <button type="button" data-date="yesterday" class="secondary-button recall-button">Yesterday</button>
-        <input type="date" id="custom-date" class="date-input" aria-label="Select a date to recall entries" />
-      </div>
-      <p class="summary-text" id="recall-summary">Showing all logged entries.</p>
-    </section>
-
-    <section class="summary-grid">
-      <article class="card summary-card">
-        <h3>Daily totals</h3>
-        <div class="summary-value">
-          <span>Calories</span>
-          <strong id="daily-calories">0</strong>
-        </div>
-        <div class="summary-value">
-          <span>Protein</span>
-          <strong id="daily-protein">0 g</strong>
-        </div>
-        <div class="summary-value">
-          <span>Carbs</span>
-          <strong id="daily-carbs">0 g</strong>
-        </div>
-        <div class="summary-value">
-          <span>Fats</span>
-          <strong id="daily-fats">0 g</strong>
-        </div>
-      </article>
-      <article class="card summary-card highlight-card">
-        <h3>Today's meals</h3>
-        <p class="summary-text">Log your meals and review nutrition subtotals by meal category.</p>
-      </article>
-    </section>
-
-    <section id="meal-list" class="meal-list"></section>
-
-    <!-- Floating Action Button for Mobile -->
-    <button id="fab-add" class="fab-button" aria-label="Quick add food item">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-    </button>
-  </main>
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-
-    // Firebase configuration - Replace with your Firebase project config
-    const firebaseConfig = {
-  apiKey: "AIzaSyDfO3MCiFYG76zBf_1X5LzbuzWRi_n33pA",
-  authDomain: "fitness-tracker-bc7b5.firebaseapp.com",
-  projectId: "fitness-tracker-bc7b5",
-  storageBucket: "fitness-tracker-bc7b5.firebasestorage.app",
-  messagingSenderId: "993376580041",
-  appId: "1:993376580041:web:fd859fcb4b319426853818",
-  measurementId: "G-R15N7CHXLT"
-};
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    window.firebaseReady = new Promise((resolve) => {
-      window.resolveFirebaseReady = resolve;
-    });
-
-    window.firebaseAuth = auth;
-    window.firebaseDb = db;
-    window.firebaseFunctions = { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, collection, addDoc, getDocs, deleteDoc, doc, query, where, onSnapshot };
-    window.resolveFirebaseReady();
-  </script>
-  <script src="script.js" defer></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
